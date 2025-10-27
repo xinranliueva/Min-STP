@@ -17,7 +17,7 @@ on the **ModelNet10** dataset.
     ├── amortized_slicer.py        # Main training script (command-line executable)
     ├── pointcloud_ae.py           # PointNet-style AutoEncoder for 3D point clouds
     ├── data.py                    # Dataset utilities: PairedModelNet, get_class_subset
-    ├── models.py                  # MLPWithSkipConnections used for amortized STP mapping
+    ├── models.py                  # Model options used for amortized STP mapping
     ├── softsort.py                # Differentiable SoftSort operator implementation
     └── lapsum.py                  # Laplace-summed soft permutation operator (soft_permutation)
 
