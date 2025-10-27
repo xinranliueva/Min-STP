@@ -90,7 +90,7 @@ PyTorch Geometric:
 
 Raw data is typically stored under:
 
-    ~/Min_Gen_Slices/pointcloud/ModelNet10/
+    ./ModelNet10/
 
 ------------------------------------------------------------------------
 
@@ -145,48 +145,5 @@ original plotting scripts).
 
 This modular structure supports: - Plug-in replacements for the encoder
 (e.g., DGCNN, PointTransformer) - Alternate differentiable sorting
-(e.g., SinkhornSort) - New contexts (e.g., temporal slices, multimodal
-features)
+(e.g., SinkhornSort)
 
-------------------------------------------------------------------------
-
-## 🧑‍💻 Example Workflow
-
-1.  **Pretrain AutoEncoder**
-
-    ``` bash
-    python pretrain_pointcloud_ae.py
-    ```
-
-    (if you wish to retrain the AE instead of loading
-    `model_checkpoint.pth`)
-
-2.  **Train Amortized STP**
-
-    ``` bash
-    python amortized_slicer.py --pair chair table
-    ```
-
-3.  **Analyze and Plot** Load `.pkl` results for comparison with
-    baseline OT or Wasserstein Wormhole distances.
-
-------------------------------------------------------------------------
-
-## ✨ Citation
-
-If you use this codebase in academic work, please cite:
-
-    @inproceedings{liu2025amortizedstp,
-      title={Amortized Minimum Sliced Transport Plan for 3D Shape Alignment},
-      author={Liu, Xinran and Kolouri, Soheil},
-      booktitle={ICLR},
-      year={2025}
-    }
-
-------------------------------------------------------------------------
-
-## 📧 Contact
-
-Maintained by **Xinran (Eva) Liu**\
-Ph.D. Candidate, Computer Science @ Vanderbilt University\
-✉️ \[email address / GitHub profile if desired\]
