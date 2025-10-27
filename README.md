@@ -37,18 +37,6 @@ seaborn
 pot          # Python Optimal Transport (ot)
 ```
 
-Optionally:
-
-``` bash
-jax          # For Wasserstein Wormhole experiments
-```
-
-You can install dependencies via:
-
-``` bash
-pip install torch torch-geometric numpy tqdm matplotlib seaborn pot jax
-```
-
 ------------------------------------------------------------------------
 
 ## 🧠 Overview
