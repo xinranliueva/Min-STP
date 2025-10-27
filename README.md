@@ -12,7 +12,7 @@ on the **ModelNet10** dataset.
 
 ## 📁 Directory Structure
 
-    /home/liux31/Min_Gen_Slices/pointcloud/
+    ./
     │
     ├── amortized_slicer.py        # Main training script (command-line executable)
     ├── pointcloud_ae.py           # PointNet-style AutoEncoder for 3D point clouds
