@@ -114,13 +114,14 @@ class AmortizedSlicerTrainer:
         losses, test_costs, train_costs = [], [], []
 
         for e in range(self.outer_epochs):
+            optimizer.zero_grad()
             for pc1, pc2 in tqdm(self.train_loader, desc=f"Epoch {e+1}/{self.outer_epochs}"):
                 cX, X = self._compute_context(pc1)
                 cY, Y = self._compute_context(pc2)
-
+            
                 for _ in range(self.inner_epochs):
                     model.train()
-                    optimizer.zero_grad()
+                    
 
                     Xout, Yout, M, _, _ = self._pair_forward(X, Y, cX, cY, model, context_proj)
 
@@ -138,10 +139,10 @@ class AmortizedSlicerTrainer:
                     pi = (P1 + P2) / 2
                     loss = (pi * M).sum()
                     loss.backward()
-                    optimizer.step()
+            
                     losses.append(loss.item())
-
-                scheduler.step()
+            optimizer.step()
+            scheduler.step()
 
             # Evaluation
             if e % 6 == 0 or e == self.outer_epochs - 1:
