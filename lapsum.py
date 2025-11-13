@@ -12,7 +12,7 @@ class SoftTopK(torch.autograd.Function):
     #         e > 0, t + torch.log(z) - torch.log(ab), s - torch.log(z) + torch.log(ab)
     #     )
     
-    ## A more stable version of _solve written by Eva
+    ## A more stable version of _solve
     @staticmethod
     def _solve(s, t, a, b, e, eps=1e-12):
         s, t, a, b, e = [arg.to(torch.float64) for arg in (s, t, a, b, e)]

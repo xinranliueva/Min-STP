@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 amortized_slicer_trainer.py
-Author: Xinran (Eva) Liu
 
 Trainer for amortized min-STP learning on Image-to-Image translation.
 """
