@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-def get_class_subset(dataset, class_name, raw_root="/home/liux31/Min_Gen_Slices/pointcloud/ModelNet10/raw"):
+def get_class_subset(dataset, class_name, raw_root="./ModelNet10/raw"):
     """
     Return a subset of ModelNet dataset belonging to a specific class.
     """
