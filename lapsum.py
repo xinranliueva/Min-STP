@@ -55,7 +55,7 @@ class SoftTopK(torch.autograd.Function):
             idx = torch.arange(start=num_dim - 1, end=-1, step=-1, device=x.device)
             torch.index_select(x, 1, idx, out=eA)
             # eA.add_(scaled).exp_()
-            # safer exponential written by Eva
+            # safer exponential
             tmp = eA + scaled
             tmp = torch.clamp(tmp, max=40.0)     # exp(40) ≈ 2e17, large but finite
             eA = torch.exp(tmp)
