@@ -70,7 +70,7 @@ The structure is designed so each module can be reused independently.
 
 - **`softsort.py`**  
   SoftSort operator (soft and hard variants).  
-  Used for differentiable sorting.
+  Used only for hard sorting in the code.
 
 - **`lapsum.py`**  
   Laplace-summed `soft_permutation` operator.  
