@@ -352,68 +352,7 @@ class SetTransformer(nn.Module):
         return out.squeeze()
 
 
-class DeepSet(nn.Module):
-    def __init__(self, model_config):
-        super(DeepSet, self).__init__()
-        self.dim_hidden = model_config['dim_hidden']
 
-        self.pooling = GAP()
-
-        self.activation = nn.ReLU()
-        self.dim_input = model_config['dim_input']
-        self.dim_output = model_config['dim_output']
-        self.num_output = model_config['num_output']
-        self.params_budget = model_config['params_budget']
-
-        if self.pool_name == 'SWE':
-            first_dec_layer = nn.Linear(self.num_ref * self.num_slice, self.dim_hidden)
-        elif self.pool_name == 'GAP':
-            first_dec_layer = nn.Linear(self.dim_hidden, self.dim_hidden)
-
-        if self.params_budget is None:
-            self.enc = nn.Sequential(
-                nn.Linear(self.dim_input, self.dim_hidden),
-                self.activation,
-                ResBlock('Linear', self.dim_hidden, self.dim_hidden, activation=nn.ReLU()),
-                self.activation,
-                nn.Linear(self.dim_hidden, self.dim_hidden))
-
-            self.dec = nn.Sequential(
-                first_dec_layer,
-                self.activation,
-                ResBlock('Linear', self.dim_hidden, self.dim_hidden, activation=nn.ReLU()),
-                self.activation,
-                nn.Linear(self.dim_hidden, self.num_output * self.dim_output))
-        else:
-            enc_base = nn.ModuleList([
-                nn.Linear(self.dim_input, self.dim_hidden),
-                self.activation,
-                self.activation,
-                nn.Linear(self.dim_hidden, self.dim_hidden)
-            ])
-            insert_id = 2
-            block = ResBlock('Linear', self.dim_hidden, self.dim_hidden, activation=nn.ReLU())
-            enc = update_arch_under_budget(enc_base, insert_id, self.params_budget // 2, block)
-            self.enc = nn.Sequential(*enc)
-
-            dec_base = nn.ModuleList([
-                first_dec_layer,
-                self.activation,
-                self.activation,
-                nn.Linear(self.dim_hidden, self.num_output * self.dim_output)
-            ])
-            insert_id = 2
-            dec = update_arch_under_budget(dec_base, insert_id, self.params_budget // 2, block)
-            self.dec = nn.Sequential(*dec)
-
-    def forward(self, X):
-        X = self.enc(X)
-        # print(X.shape)
-        X = self.pooling(X).reshape(1, -1)
-        # print(X.shape)
-        X = self.dec(X).reshape(self.num_output, self.dim_output)
-        # print(X.shape, '\n')
-        return X.squeeze()
 
 
 def update_arch_under_budget(cur_arch, insert_id, budget, block):
@@ -436,13 +375,6 @@ def update_arch_under_budget(cur_arch, insert_id, budget, block):
             new_arch.insert(insert_id, deepcopy(block))
     return new_arch
 
-
-class GAP(torch.nn.Module):
-    def __init__(self):
-        super(GAP, self).__init__()
-
-    def forward(self, X):
-        return X.mean(0).unsqueeze(0)
     
 
 

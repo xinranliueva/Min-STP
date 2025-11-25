@@ -60,7 +60,7 @@ The structure is designed so each module can be reused independently.
 - **`models.py`**  
   Contains all slicer and set-based architectures:  
   - `SetTransformer` (default)  
-  - `MLPWithSkipConnections`, `MLP`, `DeepSet`  
+  - `MLPWithSkipConnections`, `MLP`, etc.
   - `pairSetTransformer` for cross-set attention  
   - Residual and multi-head attention blocks
 
