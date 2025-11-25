@@ -1,149 +1,118 @@
-# 🌀 Amortized Min-STP Training for 3D Point Cloud Matching
+# Efficient Transferable Optimal Transport via Min-Sliced Transport Plans 
 
-This repository implements the **Amortized Minimum Sliced Transport Plan
-(Min-STP)** framework for learning efficient alignment between 3D point
-clouds using **PointNet-based autoencoding** and **soft permutation
-layers**.
+This repository provides modular components for learning Min-STP. It includes:
 
-The implementation is modular and reproducible, designed for experiments
-on the **ModelNet10** dataset.
+- **Amortized training pipelines** (e.g., Gaussian → shape, class → class)  
+- **Sequential / multi-task training pipelines** (e.g., gradual task drift via `SequenceTransfer.ipynb`)  
+- PointNet autoencoders (for context vectors)
+- SetTransformer / MLP models  
+- Differentiable sorting and soft permutation operators  
+- Data utilities for ModelNet10
 
-------------------------------------------------------------------------
+The structure is designed so each module can be reused independently.
 
-## 📁 Directory Structure
+---
 
-    ./
-    │
-    ├── amortized_slicer.py        # Main training script (command-line executable)
-    ├── pointcloud_ae.py           # PointNet-style AutoEncoder for 3D point clouds
-    ├── data.py                    # Dataset utilities: PairedModelNet, get_class_subset
-    ├── models.py                  # Model options used for amortized STP mapping
-    ├── softsort.py                # Differentiable SoftSort operator implementation
-    └── lapsum.py                  # Laplace-summed soft permutation operator (soft_permutation)
+## 📁 Directory Overview
 
-------------------------------------------------------------------------
-
-## ⚙️ Requirements
-
-Python ≥ 3.10 with the following key packages:
-
-``` bash
-torch
-torch-geometric
-numpy
-tqdm
-matplotlib
-seaborn
-pot          # Python Optimal Transport (ot)
+```
+./
+├── README.md
+│
+├── amortized_slicer.py
+├── amortized_slicer_pc.py
+│
+├── pointcloud_ae.py
+├── data.py
+├── models.py
+├── softsort.py
+├── lapsum.py
+│
+├── SequenceTransfer.ipynb
+└── ModelNet10/
 ```
 
-------------------------------------------------------------------------
+---
 
-## 🧠 Overview
+## 🔧 File Descriptions
 
-The amortized Min-STP framework learns a **contextualized transport
-map** between paired 3D point clouds: - A **PointNet AutoEncoder**
-encodes each shape into a latent context vector. - A lightweight **MLP
-with skip connections** learns slice-wise transport scores. - The model
-is trained with **two symmetric soft/hard sorting passes**, forming a
-differentiable approximation of the **minimum sliced transport plan**.
+### **Training Pipelines**
 
-------------------------------------------------------------------------
+- **`amortized_slicer.py`**  
+  Paired **class → class** training script using symmetric soft/hard sorting.  
+  Uses latent context vectors from the point cloud autoencoder model.
 
-## 🧩 Core Components
+- **`amortized_slicer_pc.py`**  
+  **Gaussian → shape** amortized training.  
+  Uses Gaussian noise as the source distribution and conditions on a shape’s latent context vector.
 
-  -----------------------------------------------------------------------------
-  File                        Description
-  --------------------------- -------------------------------------------------
-  **`pointcloud_ae.py`**      Defines `PointCloudAE`, a PointNet-style
-                              encoder--decoder for point clouds.
+- **`SequenceTransfer.ipynb`**  
+  Sequential training across **gradually drifting tasks**.  
+  Useful for transferability, curriculum learning, and studying how learned slicers adapt across sequences of related distributions.
 
-  **`data.py`**               Defines `PairedModelNet`, which constructs class
-                              pairs (e.g., *chair* vs *table*) for OT
-                              alignment.
+---
 
-  **`models.py`**             Defines `MLPWithSkipConnections`, the amortized
-                              map network used to predict slice outputs.
+### **Models**
 
-  **`softsort.py`**           Provides differentiable sorting operators
-                              (`SoftSort_p2` and hard variants).
+- **`pointcloud_ae.py`**  
+  PointNet-style autoencoder that produces latent embeddings for 3D point clouds.
 
-  **`lapsum.py`**             Implements `soft_permutation`, a Laplace-smoothed
-                              soft matching operator.
+- **`models.py`**  
+  Contains all slicer and set-based architectures:  
+  - `SetTransformer` (default)  
+  - `MLPWithSkipConnections`, `MLP`, `DeepSet`  
+  - `pairSetTransformer` for cross-set attention  
+  - Residual and multi-head attention blocks
 
-  **`amortized_slicer.py`**   Main entry point: orchestrates training,
-                              evaluation, and result saving.
-  -----------------------------------------------------------------------------
+---
 
-------------------------------------------------------------------------
+### **Differentiable Operators**
 
-## 📦 Dataset: ModelNet10
+- **`softsort.py`**  
+  SoftSort operator (soft and hard variants).  
+  Used for differentiable sorting.
 
-The script automatically downloads and preprocesses **ModelNet10** via
-PyTorch Geometric:
+- **`lapsum.py`**  
+  Laplace-summed `soft_permutation` operator.  
+  Produces stable soft permutation matrices.
 
--   Each object is sampled into **1024 points**
-    (`T.SamplePoints(1024)`).
--   Coordinates are normalized via `T.NormalizeScale()`.
--   You can choose any two classes (e.g., `chair` vs `table`, `monitor`
-    vs `desk`) for training.
+---
 
-Raw data is typically stored under:
+### **Dataset Utilities**
 
-    ./ModelNet10/
+- **`data.py`**  
+  - `PairedModelNet`: builds paired samples for two ModelNet10 classes  
+  - `get_class_subset`: extracts a class-specific subset  
 
-------------------------------------------------------------------------
+---
 
 ## 🚀 Usage
 
-### 1. Train amortized Min-STP between two classes
+### **Paired class → class**
 
-``` bash
+```bash
 python amortized_slicer.py --device cuda:0 --pair chair table
 ```
 
-This will: - Load pre-trained AE from
-`./ModelNet10/model_checkpoint.pth` - Train amortized min-STP for 25
-outer epochs × 100 inner iterations - Save results under `./ckpts/`
+### **Gaussian → shape**
 
-### 2. Optional arguments
-
-  Argument           Default          Description
-  ------------------ ---------------- --------------------------------------------
-  `--device`         `cuda:0`         Compute device (`cpu`, `cuda`, `cuda:IDX`)
-  `--pair`           `monitor desk`   Pair of ModelNet10 classes
-  `--lr`             `1e-4`           Learning rate
-  `--outer_epochs`   `25`             Number of outer epochs
-  `--inner_epochs`   `100`            Inner updates per batch
-  `--save_dir`       `./ckpts`        Directory to save results
-  `--seed`           `42`             Random seed for reproducibility
-
-Example with custom setup:
-
-``` bash
-python amortized_slicer.py --device cuda:1 --pair chair toilet --outer_epochs 30 --inner_epochs 120 --lr 5e-5
+```bash
+python amortized_slicer_pc.py --device cuda:0
 ```
 
-------------------------------------------------------------------------
+Both scripts:
+- Load ModelNet10 via PyTorch Geometric  
+- Load the autoencoder  
+- Train a slicer model  
+- Save outputs in `./ckpts/`
 
-## 🧾 Outputs
+---
 
-After training, results are stored in `ckpts/`:
+## 📦 Outputs
 
-    ckpts/
-    ├── train_costs_chair_table.pkl
-    ├── test_costs_chair_table.pkl
-
-Each `.pkl` file contains a NumPy array of averaged costs per evaluation
-epoch.\
-You can visualize correlations with OT or other baselines (see your
-original plotting scripts).
-
-------------------------------------------------------------------------
-
-## 🔬 Extensions
-
-This modular structure supports: - Plug-in replacements for the encoder
-(e.g., DGCNN, PointTransformer) - Alternate differentiable sorting
-(e.g., SinkhornSort)
-
+```
+ckpts/
+├── pointnet_model_ckpt.pth
+├── train_costs_*.pkl
+└── test_costs_*.pkl
+```
